@@ -11,43 +11,26 @@
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-// type Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => React.ReactElement;
-// type Inputs<T> = { [k in keyof T]: Input };
-// type FieldNames<T> = { [k in keyof T]: k };
-// interface IFormProps<T> extends React.FormHTMLAttributes<HTMLFormElement> {
-//     children: (props: { fields: Fields<T>; }) => React.ReactElement;
-// }
-// export class FormBuilder<T> {
-//     // public fieldNames: FieldNames<T>;
-//     public readonly form: (props: IFormProps<T>) => React.ReactElement;
-//     // public readonly inputs: Inputs<T>;
-//     public readonly submit: (props: React.InputHTMLAttributes<HTMLInputElement>) => React.ReactElement;
-//     public readonly reset: (props: React.InputHTMLAttributes<HTMLInputElement>) => React.ReactElement;
-//     constructor(fieldOptions: Fields<T>) {
-//         this.form = props => <Form {...props} onSubmit={(e) => { e.preventDefault(); console.log("submit"); }}/>;
-//         this.submit = props => <input type="submit" {...props}/>;
-//         this.reset = props => <input type="reset" {...props}/>;
-//         // this.fieldNames = Object.keys(fieldOptions).reduce((fieldNames, fieldName) => ({ ...fieldNames, [fieldName]: fieldName }), { } as FieldNames<T>);
-//         // const initialValue: Inputs<any> = { };
-//         // const reducer = (inputs: Inputs<T>, key: string) => {
-//         //     const newInput: Input = props => <InputWithValidator name={key} validationResult={{}}>{props.children}</InputWithValidator>;
-//         //     return {
-//         //         ...inputs, 
-//         //         [key]: newInput
-//         //     };
-//         // };
-//         // this.inputs = Object.keys(fieldOptions).reduce(reducer, initialValue);
-//     }
-// }
-// const formDataToJson = (formData: FormData) => 
-//     [...formData.entries()].reduce((json, [key, value]) => ({ ...json, [key]: value }), { });
-const validate = (fields, data) => {
-    return Object.entries(fields).reduce((result, [key, field]) => {
+const createEmptyResult = (fieldOptions) => {
+    return Object.keys(fieldOptions).reduce((result, key) => {
+        const newField = {
+            name: key,
+            value: null,
+            errors: [],
+        };
+        return {
+            ...result,
+            [key]: newField,
+        };
+    }, {});
+};
+const validate = (fieldOptions, data) => {
+    return Object.entries(fieldOptions).reduce((result, [key, field]) => {
         const value = data.get(key);
         const validators = field.validators;
-        const errors = validators && validators.map(validator => validator(value)).filter(Boolean) || [];
+        const errors = validators && validators.map(validator => validator(value.toString())).filter(Boolean) || [];
         const newField = {
-            ...field,
+            name: key,
             value,
             errors
         };
@@ -57,16 +40,16 @@ const validate = (fields, data) => {
         };
     }, {});
 };
-const submit = (fields, updateFields) => (event) => {
+const submit = (fieldOptions, updateFields) => (event) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const result = validate(fields, formData);
+    const result = validate(fieldOptions, formData);
     updateFields(result);
     console.log(result);
 };
-exports.FFForm = (props) => {
-    const [fields, updateFields] = React.useState(props.fields);
-    return (React.createElement("form", { onSubmit: submit(fields, updateFields) }, props.children({ fieldOptions: fields })));
+exports.GenericForm = ({ children, fieldOptions, ...formProps }) => {
+    const [result, updateResult] = React.useState(createEmptyResult(fieldOptions));
+    return (React.createElement("form", Object.assign({}, formProps, { onSubmit: submit(fieldOptions, updateResult) }), children({ fieldOptions, fields: result })));
 };
 
 
@@ -85,13 +68,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 const react_dom_1 = __webpack_require__(/*! react-dom */ "./node_modules/react-dom/index.js");
 const builder_1 = __webpack_require__(/*! ./builder */ "./src/builder.tsx");
-// const formBuilder = new FormBuilder<IPerson>({ 
-//     firstname: { },
-//     lastname: { },
-//     email: { },
-//     birthdate: { },
-//     gender: { }
-// });
+const input_1 = __webpack_require__(/*! ./input */ "./src/input.tsx");
+const validation_1 = __webpack_require__(/*! ./validation */ "./src/validation.ts");
+const fieldOptions = {
+    email: { validators: [validation_1.simpleMail] },
+    lastname: { validators: [validation_1.minLength(2), validation_1.maxLength(20)] },
+    birthdate: { validators: [validation_1.isBefore(new Date())] },
+    firstname: { validators: [validation_1.minLength(2), validation_1.maxLength(20)] },
+    gender: {}
+};
 const App = () => (React.createElement(React.Fragment, null,
     React.createElement("style", { dangerouslySetInnerHTML: { __html: `
             form {
@@ -105,16 +90,62 @@ const App = () => (React.createElement(React.Fragment, null,
                 margin-bottom: 1em;
             }
         ` } }),
-    React.createElement(builder_1.FFForm, { fields: {
-            email: {},
-            lastname: {},
-            birthdate: {},
-            firstname: { value: "hallowelt" },
-            gender: {}
-        } }, props => (React.createElement(React.Fragment, null,
-        React.createElement("input", { name: "firstname" }),
+    React.createElement(builder_1.GenericForm, { fieldOptions: fieldOptions }, props => (React.createElement(React.Fragment, null,
+        React.createElement(input_1.InputWithValidator, { field: props.fields.firstname, placeholder: "First name" }),
+        React.createElement(input_1.InputWithValidator, { field: props.fields.lastname, placeholder: "Last name" }),
+        React.createElement(input_1.InputWithValidator, { field: props.fields.email, placeholder: "Eg. example@email.com" }),
+        React.createElement(input_1.InputWithValidator, { field: props.fields.birthdate, type: "date" }),
+        React.createElement("select", { name: props.fields.gender.name },
+            React.createElement("option", { disabled: true, selected: true }, "gender"),
+            React.createElement("option", { value: "male" }, "male"),
+            React.createElement("option", { value: "female" }, "female")),
         React.createElement("input", { type: "submit", value: "Submit" }))))));
 react_dom_1.render(React.createElement(App, null), document.getElementById("app"));
+
+
+/***/ }),
+
+/***/ "./src/input.tsx":
+/*!***********************!*\
+  !*** ./src/input.tsx ***!
+  \***********************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+;
+exports.InputWithValidator = ({ field, ...inputProps }) => (React.createElement("div", null,
+    React.createElement("input", Object.assign({}, inputProps, { name: field.name, style: { borderColor: field.errors.length ? "red" : "gray" } })),
+    React.createElement("ul", null, field.errors.map(error => React.createElement("li", null, error)))));
+
+
+/***/ }),
+
+/***/ "./src/validation.ts":
+/*!***************************!*\
+  !*** ./src/validation.ts ***!
+  \***************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+// export type ValidationFunctionWithParams = (...params: any[]) => ValidationFunction;
+// string
+exports.minLength = (minLength) => (value) => value.length >= minLength ? null : `value should be greater than or equal to ${minLength} characters.`;
+exports.maxLength = (maxLength) => (value) => value.length <= maxLength ? null : `value should be less than or equal to ${maxLength} characters.`;
+exports.simpleMail = (value) => value.match(/\S+@\S+\.\S+/) ? null : `please enter a valid email address`;
+// number
+exports.minValue = (minValue) => (value) => Number(value) >= minValue ? null : `value should be greater than or equal to ${minValue}.`;
+exports.maxValue = (maxValue) => (value) => Number(value) <= maxValue ? null : `value should be less than or equal to ${maxValue}.`;
+exports.isEven = (value) => Number(value) % 2 === 0 ? null : `value should be even.`;
+exports.isOdd = (value) => Number(value) % 2 !== 0 ? null : `value should be odd.`;
+// date
+exports.isBefore = (date) => (value) => new Date(value) < date ? null : `the date should be before ${date.toString()}`;
 
 
 /***/ })

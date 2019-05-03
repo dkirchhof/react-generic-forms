@@ -1,7 +1,9 @@
 import * as React from "react";
 import { render } from "react-dom";
 
-import { FFForm } from "./builder";
+import { GenericForm, FieldOptions } from "./builder";
+import { InputWithValidator } from "./input";
+import { minLength, maxLength, simpleMail, isBefore } from "./validation";
 
 interface IPerson {
     firstname: string;
@@ -12,14 +14,13 @@ interface IPerson {
     gender: "male" | "female";
 }
 
-// const formBuilder = new FormBuilder<IPerson>({ 
-//     firstname: { },
-//     lastname: { },
-//     email: { },
-//     birthdate: { },
-
-//     gender: { }
-// });
+const fieldOptions: FieldOptions<IPerson> = { 
+    email: { validators: [simpleMail] }, 
+    lastname: { validators: [minLength(2), maxLength(20)] }, 
+    birthdate: { validators: [isBefore(new Date())] }, 
+    firstname: { validators: [minLength(2), maxLength(20)] }, 
+    gender: { }
+};
 
 const App = () => (
     <>
@@ -36,34 +37,24 @@ const App = () => (
             }
         `}}/>
 
-        <FFForm<IPerson> 
-            fields={{ 
-                email: { }, 
-                lastname: { }, 
-                birthdate: { }, 
-                firstname: { value: "hallowelt" }, 
-                gender: { }
-                }}>
+        <GenericForm<IPerson> fieldOptions={fieldOptions}>
             {props => (
                 <>
-                    <input name={"firstname"}/>
+                    <InputWithValidator field={props.fields.firstname} placeholder="First name"/>
+                    <InputWithValidator field={props.fields.lastname} placeholder="Last name"/>
+                    <InputWithValidator field={props.fields.email} placeholder="Eg. example@email.com"/>
+                    <InputWithValidator field={props.fields.birthdate} type="date"/>
+                    
+                    <select name={props.fields.gender.name}>
+                        <option disabled selected>gender</option>
+                        <option value="male">male</option>
+                        <option value="female">female</option>
+                    </select>
+
                     <input type="submit" value="Submit"/>
                 </>
             )}
-        </FFForm>
-
-         {/* <formBuilder.inputs.firstname>
-            <input placeholder="First name"/>
-        </formBuilder.inputs.firstname> */}
-
-        {/* <input name={formBuilder.fieldNames.lastname} placeholder="Last name"/>
-        <input name={formBuilder.fieldNames.email} placeholder="Eg. example@example.com" type="email"/>
-        <input name={formBuilder.fieldNames.birthdate} type="date"/>
-
-        <select name={formBuilder.fieldNames.gender}>
-            <option value="male">male</option>
-            <option value="female">female</option>
-        </select> */}
+        </GenericForm>
 
         {/* <formBuilder.inputs.firstname placeholder="First name"/>
         <formBuilder.inputs.lastname placeholder="Last name"/>

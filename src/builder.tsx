@@ -1,65 +1,39 @@
 import * as React from "react";
 
-import { Form } from "./form";
-import { InputWithValidator } from "./input";
+import { ValidationFunction } from "./validation";
 
-type Field<T> = { validators?: any; errors?: any; value?: T; };
-type Fields<T> = { [k in keyof T]: Field<T[k]>; };
+export type FieldOption<T> = { validators?: ValidationFunction[]; };
+export type FieldOptions<T> = { [k in keyof T]: FieldOption<T[k]>; };
 
-// type Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => React.ReactElement;
-// type Inputs<T> = { [k in keyof T]: Input };
+export type Field<T> = { name: string; errors: string[]; value: T; };
+export type Fields<T> = { [k in keyof T]: Field<T[k]>; };
 
-// type FieldNames<T> = { [k in keyof T]: k };
-
-// interface IFormProps<T> extends React.FormHTMLAttributes<HTMLFormElement> {
-//     children: (props: { fields: Fields<T>; }) => React.ReactElement;
-// }
-
-// export class FormBuilder<T> {
-//     // public fieldNames: FieldNames<T>;
-
-//     public readonly form: (props: IFormProps<T>) => React.ReactElement;
-//     // public readonly inputs: Inputs<T>;
-    
-//     public readonly submit: (props: React.InputHTMLAttributes<HTMLInputElement>) => React.ReactElement;
-//     public readonly reset: (props: React.InputHTMLAttributes<HTMLInputElement>) => React.ReactElement;
-
-//     constructor(fieldOptions: Fields<T>) {
-//         this.form = props => <Form {...props} onSubmit={(e) => { e.preventDefault(); console.log("submit"); }}/>;
-
-//         this.submit = props => <input type="submit" {...props}/>;
-//         this.reset = props => <input type="reset" {...props}/>;
-
-//         // this.fieldNames = Object.keys(fieldOptions).reduce((fieldNames, fieldName) => ({ ...fieldNames, [fieldName]: fieldName }), { } as FieldNames<T>);
-
-
-//         // const initialValue: Inputs<any> = { };
+const createEmptyResult = (fieldOptions: FieldOptions<any>) => {
+    return Object.keys(fieldOptions).reduce((result, key) => {
         
-//         // const reducer = (inputs: Inputs<T>, key: string) => {
-//         //     const newInput: Input = props => <InputWithValidator name={key} validationResult={{}}>{props.children}</InputWithValidator>;
+        const newField: Field<any> = {
+            name: key,
+            value: null,
+            errors: [],
+        };
 
-//         //     return {
-//         //         ...inputs, 
-//         //         [key]: newInput
-//         //     };
-//         // };
+        return { 
+            ...result,
+            [key]: newField,
+        };
 
-//         // this.inputs = Object.keys(fieldOptions).reduce(reducer, initialValue);
-//     }
-// }
+    }, { }) as Fields<any>;
+}
 
-// const formDataToJson = (formData: FormData) => 
-//     [...formData.entries()].reduce((json, [key, value]) => ({ ...json, [key]: value }), { });
-
-const validate = (fields: Fields<any>, data: FormData) => {
-    return Object.entries(fields).reduce((result, [key, field]) => {      
+const validate = (fieldOptions: FieldOptions<any>, data: FormData) => {
+    return Object.entries(fieldOptions).reduce((result, [key, field]) => {      
 
         const value = data.get(key);
         const validators = field.validators;
-        const errors = validators && validators.map(validator => validator(value)).filter(Boolean) || [];
+        const errors = validators && validators.map(validator => validator(value.toString())).filter(Boolean) || [];
 
         const newField: Field<any> = {
-            ...field,
+            name: key,
             value,
             errors
         }
@@ -69,31 +43,36 @@ const validate = (fields: Fields<any>, data: FormData) => {
             [key]: newField,
         };
 
-    }, { });
+    }, { }) as Fields<any>;
 };
 
-const submit = (fields: Fields<any>, updateFields: React.Dispatch<React.SetStateAction<{}>>) => (event: React.FormEvent<HTMLFormElement>) => {
+const submit = (fieldOptions: FieldOptions<any>, updateFields: React.Dispatch<React.SetStateAction<{}>>) => (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
-    const result = validate(fields, formData);
+    const result = validate(fieldOptions, formData);
 
     updateFields(result);
     console.log(result);
 };
 
-interface IFFFormProps<T> extends React.FormHTMLAttributes<HTMLFormElement> {
-    fields: Fields<T>;
+interface GenericFormProps<T> extends React.FormHTMLAttributes<HTMLFormElement> {
+    fieldOptions: FieldOptions<T>;
 
-    children: (props: { fieldOptions: Fields<T>; }) => React.ReactElement;
+    children: (props: GenericFormDataProps<T>) => React.ReactElement;
 }
 
-export const FFForm = <T extends object>(props: IFFFormProps<T>) => {
-    const [fields, updateFields] = React.useState(props.fields);
+interface GenericFormDataProps<T> {
+    fieldOptions: FieldOptions<T>;
+    fields: Fields<T>;
+}
+
+export const GenericForm = <T extends any>({ children, fieldOptions, ...formProps }: GenericFormProps<T>) => {
+    const [result, updateResult] = React.useState<Fields<T>>(createEmptyResult(fieldOptions));
 
     return (
-        <form onSubmit={submit(fields, updateFields)}>
-            {props.children({ fieldOptions: fields })}
+        <form {...formProps} onSubmit={submit(fieldOptions, updateResult)}>
+            {children({ fieldOptions, fields: result })}
         </form>
     );
 }
