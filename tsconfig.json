@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "jsx": "react",
+        "target": "esnext",
+        "importHelpers": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true
+    }
+}
