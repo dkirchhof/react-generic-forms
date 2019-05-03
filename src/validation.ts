@@ -1,4 +1,4 @@
-export type ValidationFunction = (value: string) => string | null
+export type ValidationFunction = (value: string | File) => string | null
 // export type ValidationFunctionWithParams = (...params: any[]) => ValidationFunction;
 
 // string
@@ -14,3 +14,6 @@ export const isOdd = (value: string) => Number(value) % 2 !== 0 ? null : `value 
 
 // date
 export const isBefore = (date: Date) => (value: string) => new Date(value) < date ? null : `the date should be before ${date.toString()}`;
+
+// file
+export const maxFileSize = (maxSize: number) => (value: File) => value.size <= maxSize ? null : `the file size exceeded the maximum size of ${maxSize} bytes`;

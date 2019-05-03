@@ -3,15 +3,15 @@ import { render } from "react-dom";
 
 import { GenericForm, FieldOptions } from "./builder";
 import { InputWithValidator } from "./input";
-import { minLength, maxLength, simpleMail, isBefore } from "./validation";
+import { minLength, maxLength, simpleMail, isBefore, maxFileSize } from "./validation";
 
 interface IPerson {
     firstname: string;
     lastname: string;
     email: string;
     birthdate: Date;
-
     gender: "male" | "female";
+    image: File;
 }
 
 const fieldOptions: FieldOptions<IPerson> = { 
@@ -19,7 +19,8 @@ const fieldOptions: FieldOptions<IPerson> = {
     lastname: { validators: [minLength(2), maxLength(20)] }, 
     birthdate: { validators: [isBefore(new Date())] }, 
     firstname: { validators: [minLength(2), maxLength(20)] }, 
-    gender: { }
+    gender: { },
+    image: { validators: [maxFileSize(200)] },
 };
 
 const App = () => (
@@ -45,11 +46,13 @@ const App = () => (
                     <InputWithValidator field={props.fields.email} placeholder="Eg. example@email.com"/>
                     <InputWithValidator field={props.fields.birthdate} type="date"/>
                     
-                    <select name={props.fields.gender.name}>
-                        <option disabled selected>gender</option>
+                    <select name={props.fields.gender.name} defaultValue="null">
+                        <option disabled value={"null"}>gender</option>
                         <option value="male">male</option>
                         <option value="female">female</option>
                     </select>
+
+                    <InputWithValidator field={props.fields.image} type="file"/>
 
                     <input type="submit" value="Submit"/>
                 </>

@@ -28,7 +28,7 @@ const validate = (fieldOptions, data) => {
     return Object.entries(fieldOptions).reduce((result, [key, field]) => {
         const value = data.get(key);
         const validators = field.validators;
-        const errors = validators && validators.map(validator => validator(value.toString())).filter(Boolean) || [];
+        const errors = validators && validators.map(validator => validator(value)).filter(Boolean) || [];
         const newField = {
             name: key,
             value,
@@ -75,7 +75,8 @@ const fieldOptions = {
     lastname: { validators: [validation_1.minLength(2), validation_1.maxLength(20)] },
     birthdate: { validators: [validation_1.isBefore(new Date())] },
     firstname: { validators: [validation_1.minLength(2), validation_1.maxLength(20)] },
-    gender: {}
+    gender: {},
+    image: { validators: [validation_1.maxFileSize(200)] },
 };
 const App = () => (React.createElement(React.Fragment, null,
     React.createElement("style", { dangerouslySetInnerHTML: { __html: `
@@ -95,10 +96,11 @@ const App = () => (React.createElement(React.Fragment, null,
         React.createElement(input_1.InputWithValidator, { field: props.fields.lastname, placeholder: "Last name" }),
         React.createElement(input_1.InputWithValidator, { field: props.fields.email, placeholder: "Eg. example@email.com" }),
         React.createElement(input_1.InputWithValidator, { field: props.fields.birthdate, type: "date" }),
-        React.createElement("select", { name: props.fields.gender.name },
-            React.createElement("option", { disabled: true, selected: true }, "gender"),
+        React.createElement("select", { name: props.fields.gender.name, defaultValue: "null" },
+            React.createElement("option", { disabled: true, value: "null" }, "gender"),
             React.createElement("option", { value: "male" }, "male"),
             React.createElement("option", { value: "female" }, "female")),
+        React.createElement(input_1.InputWithValidator, { field: props.fields.image, type: "file" }),
         React.createElement("input", { type: "submit", value: "Submit" }))))));
 react_dom_1.render(React.createElement(App, null), document.getElementById("app"));
 
@@ -146,6 +148,8 @@ exports.isEven = (value) => Number(value) % 2 === 0 ? null : `value should be ev
 exports.isOdd = (value) => Number(value) % 2 !== 0 ? null : `value should be odd.`;
 // date
 exports.isBefore = (date) => (value) => new Date(value) < date ? null : `the date should be before ${date.toString()}`;
+// file
+exports.maxFileSize = (maxSize) => (value) => value.size <= maxSize ? null : `the file size exceeded the maximum size of ${maxSize} bytes`;
 
 
 /***/ })
