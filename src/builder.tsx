@@ -30,13 +30,13 @@ const validate = (fieldOptions: FieldOptions<any>, data: FormData) => {
 
         const value = data.get(key);
         const validators = field.validators;
-        const errors = validators && validators.map(validator => validator(value)).filter(Boolean) || [];
+        const errors = validators && validators.map(validator => validator(data, key)).filter(Boolean) || [];
 
         const newField: Field<any> = {
             name: key,
             value,
             errors
-        }
+        };
 
         return {
             ...result,
