@@ -2,8 +2,8 @@ import * as React from "react";
 
 import { ValidationFunction } from "./validation";
 
-export type FieldOption<T> = { validators?: ValidationFunction[]; };
-export type FieldOptions<T> = { [k in keyof T]: FieldOption<T[k]>; };
+export type FieldOption = { validators?: ValidationFunction[]; };
+export type FieldOptions<T> = { [k in keyof T]: FieldOption; };
 
 export type Field<T> = { name: string; errors: string[]; value: T; };
 export type Fields<T> = { [k in keyof T]: Field<T[k]>; };
@@ -46,20 +46,28 @@ const validate = (fieldOptions: FieldOptions<any>, data: FormData) => {
     }, { }) as Fields<any>;
 };
 
-const submit = (fieldOptions: FieldOptions<any>, updateFields: React.Dispatch<React.SetStateAction<{}>>) => (event: React.FormEvent<HTMLFormElement>) => {
+const submit = (fieldOptions: FieldOptions<any>, updateFields: React.Dispatch<React.SetStateAction<{}>>, callback?: (formResult: FormResult<any>) => any) => (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
-    const result = validate(fieldOptions, formData);
+    const fields = validate(fieldOptions, formData);
 
-    updateFields(result);
-    console.log(result);
+    updateFields(fields);
+    
+    if(callback) {
+        callback({
+            fields,
+            formData,
+            isValid: Object.values(fields).every(field => !field.errors.length),
+        });
+    }
 };
 
 interface GenericFormProps<T> extends React.FormHTMLAttributes<HTMLFormElement> {
     fieldOptions: FieldOptions<T>;
-
     children: (props: GenericFormDataProps<T>) => React.ReactElement;
+    
+    onFormSubmit?: (result: FormResult<T>) => any;
 }
 
 interface GenericFormDataProps<T> {
@@ -67,11 +75,17 @@ interface GenericFormDataProps<T> {
     fields: Fields<T>;
 }
 
-export const GenericForm = <T extends any>({ children, fieldOptions, ...formProps }: GenericFormProps<T>) => {
+interface FormResult<T> {
+    fields: Fields<T>;
+    formData: FormData;
+    isValid: boolean;
+}
+
+export const GenericForm = <T extends any>({ children, fieldOptions, onFormSubmit, ...formProps }: GenericFormProps<T>) => {
     const [result, updateResult] = React.useState<Fields<T>>(createEmptyResult(fieldOptions));
 
     return (
-        <form {...formProps} onSubmit={submit(fieldOptions, updateResult)}>
+        <form {...formProps} onSubmit={submit(fieldOptions, updateResult, onFormSubmit)}>
             {children({ fieldOptions, fields: result })}
         </form>
     );

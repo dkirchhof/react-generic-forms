@@ -38,7 +38,7 @@ const App = () => (
             }
         `}}/>
 
-        <GenericForm<IPerson> fieldOptions={fieldOptions}>
+        <GenericForm<IPerson> fieldOptions={fieldOptions} onFormSubmit={console.log}>
             {props => (
                 <>
                     <InputWithValidator field={props.fields.firstname} placeholder="First name"/>
@@ -55,6 +55,7 @@ const App = () => (
                     <InputWithValidator field={props.fields.image} type="file"/>
 
                     <input type="submit" value="Submit"/>
+                    <input type="reset" value="Reset"/>
                 </>
             )}
         </GenericForm>

@@ -40,16 +40,22 @@ const validate = (fieldOptions, data) => {
         };
     }, {});
 };
-const submit = (fieldOptions, updateFields) => (event) => {
+const submit = (fieldOptions, updateFields, callback) => (event) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const result = validate(fieldOptions, formData);
-    updateFields(result);
-    console.log(result);
+    const fields = validate(fieldOptions, formData);
+    updateFields(fields);
+    if (callback) {
+        callback({
+            fields,
+            formData,
+            isValid: Object.values(fields).every(field => !field.errors.length),
+        });
+    }
 };
-exports.GenericForm = ({ children, fieldOptions, ...formProps }) => {
+exports.GenericForm = ({ children, fieldOptions, onFormSubmit, ...formProps }) => {
     const [result, updateResult] = React.useState(createEmptyResult(fieldOptions));
-    return (React.createElement("form", Object.assign({}, formProps, { onSubmit: submit(fieldOptions, updateResult) }), children({ fieldOptions, fields: result })));
+    return (React.createElement("form", Object.assign({}, formProps, { onSubmit: submit(fieldOptions, updateResult, onFormSubmit) }), children({ fieldOptions, fields: result })));
 };
 
 
@@ -91,7 +97,7 @@ const App = () => (React.createElement(React.Fragment, null,
                 margin-bottom: 1em;
             }
         ` } }),
-    React.createElement(builder_1.GenericForm, { fieldOptions: fieldOptions }, props => (React.createElement(React.Fragment, null,
+    React.createElement(builder_1.GenericForm, { fieldOptions: fieldOptions, onFormSubmit: console.log }, props => (React.createElement(React.Fragment, null,
         React.createElement(input_1.InputWithValidator, { field: props.fields.firstname, placeholder: "First name" }),
         React.createElement(input_1.InputWithValidator, { field: props.fields.lastname, placeholder: "Last name" }),
         React.createElement(input_1.InputWithValidator, { field: props.fields.email, placeholder: "Eg. example@email.com" }),
@@ -101,7 +107,8 @@ const App = () => (React.createElement(React.Fragment, null,
             React.createElement("option", { value: "male" }, "male"),
             React.createElement("option", { value: "female" }, "female")),
         React.createElement(input_1.InputWithValidator, { field: props.fields.image, type: "file" }),
-        React.createElement("input", { type: "submit", value: "Submit" }))))));
+        React.createElement("input", { type: "submit", value: "Submit" }),
+        React.createElement("input", { type: "reset", value: "Reset" }))))));
 react_dom_1.render(React.createElement(App, null), document.getElementById("app"));
 
 
