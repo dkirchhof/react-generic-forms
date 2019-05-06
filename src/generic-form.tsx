@@ -1,17 +1,48 @@
 import * as React from "react";
 
-import { ValidationFunction } from "./validation";
+import { ValidationFunction } from "./validators";
 
-export type FieldOption = { validators?: ValidationFunction[]; };
-export type FieldOptions<T> = { [k in keyof T]: FieldOption; };
+// region types and interfaces
 
-export type Field<T> = { name: string; errors: string[]; value: T; };
-export type Fields<T> = { [k in keyof T]: Field<T[k]>; };
+export type FieldOptions<T> = { [k in keyof T]: IFieldOption; };
+export type Fields<T> = { [k in keyof T]: IField<T[k]>; };
+
+export interface IFieldOption { 
+    validators?: ValidationFunction[]; 
+}
+
+export interface IField<T> { 
+    name: string; 
+    errors: string[]; 
+    value: T; 
+}
+
+export interface IGenericFormProps<T> extends React.FormHTMLAttributes<HTMLFormElement> {
+    fieldOptions: FieldOptions<T>;
+    children: (props: IGenericFormChildProps<T>) => React.ReactElement;
+    
+    onFormSubmit?: (result: IGenericFormResult<T>) => any;
+}
+
+export interface IGenericFormChildProps<T> {
+    fieldOptions: FieldOptions<T>;
+    fields: Fields<T>;
+}
+
+export interface IGenericFormResult<T> {
+    fields: Fields<T>;
+    formData: FormData;
+    isValid: boolean;
+}
+
+// endregion
+
+// region helper functions
 
 const createEmptyResult = (fieldOptions: FieldOptions<any>) => {
     return Object.keys(fieldOptions).reduce((result, key) => {
         
-        const newField: Field<any> = {
+        const newField: IField<any> = {
             name: key,
             value: null,
             errors: [],
@@ -32,7 +63,7 @@ const validate = (fieldOptions: FieldOptions<any>, data: FormData) => {
         const validators = field.validators;
         const errors = validators && validators.map(validator => validator(data, key)).filter(Boolean) || [];
 
-        const newField: Field<any> = {
+        const newField: IField<any> = {
             name: key,
             value,
             errors
@@ -46,7 +77,7 @@ const validate = (fieldOptions: FieldOptions<any>, data: FormData) => {
     }, { }) as Fields<any>;
 };
 
-const submit = (fieldOptions: FieldOptions<any>, updateFields: React.Dispatch<React.SetStateAction<{}>>, callback?: (formResult: FormResult<any>) => any) => (event: React.FormEvent<HTMLFormElement>) => {
+const submit = (fieldOptions: FieldOptions<any>, updateFields: React.Dispatch<React.SetStateAction<{}>>, callback?: (formResult: IGenericFormResult<any>) => any) => (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
@@ -63,25 +94,11 @@ const submit = (fieldOptions: FieldOptions<any>, updateFields: React.Dispatch<Re
     }
 };
 
-interface GenericFormProps<T> extends React.FormHTMLAttributes<HTMLFormElement> {
-    fieldOptions: FieldOptions<T>;
-    children: (props: GenericFormDataProps<T>) => React.ReactElement;
-    
-    onFormSubmit?: (result: FormResult<T>) => any;
-}
+// endregion
 
-interface GenericFormDataProps<T> {
-    fieldOptions: FieldOptions<T>;
-    fields: Fields<T>;
-}
+// region component
 
-interface FormResult<T> {
-    fields: Fields<T>;
-    formData: FormData;
-    isValid: boolean;
-}
-
-export const GenericForm = <T extends any>({ children, fieldOptions, onFormSubmit, ...formProps }: GenericFormProps<T>) => {
+export const GenericForm = <T extends any>({ children, fieldOptions, onFormSubmit, ...formProps }: IGenericFormProps<T>) => {
     const [result, updateResult] = React.useState<Fields<T>>(createEmptyResult(fieldOptions));
 
     return (
@@ -89,4 +106,6 @@ export const GenericForm = <T extends any>({ children, fieldOptions, onFormSubmi
             {children({ fieldOptions, fields: result })}
         </form>
     );
-}
+};
+
+// endregion

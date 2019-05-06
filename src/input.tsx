@@ -1,9 +1,9 @@
 import * as React from "react";
 
-import { Field } from "./builder";
+import { IField } from "./generic-form";
 
 interface IInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-    field: Field<any>;
+    field: IField<any>;
 };
 
 export const InputWithValidator = ({ field, ...inputProps }: IInputProps) => (
