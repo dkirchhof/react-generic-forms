@@ -1,9 +1,9 @@
 import * as React from "react";
 import { render } from "react-dom";
 
-import { GenericForm, FieldOptions } from "./generic-form";
+import { GenericForm, FieldOptions, IGenericFormResult } from "./generic-form";
 import { InputWithValidator } from "./input";
-import { minLength, maxLength, simpleMail, isBefore, maxFileSize, required, isSame } from "./validators";
+import { minLength, maxLength, simpleMail, isBefore, maxFileSize, isSame } from "./validators";
 
 interface IPerson {
     firstname: string;
@@ -27,6 +27,21 @@ const fieldOptions: FieldOptions<IPerson> = {
     passwordConfirm: { validators: [isSame<IPerson>("password")] },
 };
 
+const submit = (result: IGenericFormResult<IPerson>) => {
+    console.log(result);
+
+    if(!result.isValid) {
+        return Promise.resolve();
+    }
+    
+    return new Promise(res => {
+        setTimeout(() => {
+            console.log("submitted");
+            res();
+        }, 2000);
+    });
+};
+
 const App = () => (
     <>
         <style dangerouslySetInnerHTML={{__html: `
@@ -42,44 +57,34 @@ const App = () => (
             }
         `}}/>
 
-        <GenericForm fieldOptions={fieldOptions} onFormSubmit={console.log}>
-            {props => (
+        <GenericForm fieldOptions={fieldOptions} onFormSubmit={submit}>
+            {({ fields, isSubmitting }) => (
                 <>
-                    <InputWithValidator field={props.fields.firstname} placeholder="First name"/>
-                    <InputWithValidator field={props.fields.lastname} placeholder="Last name"/>
-                    <InputWithValidator field={props.fields.email} placeholder="Eg. example@email.com"/>
-                    <InputWithValidator field={props.fields.birthdate} type="date"/>
+                    <InputWithValidator field={fields.firstname} placeholder="First name"/>
+                    <InputWithValidator field={fields.lastname} placeholder="Last name"/>
+                    <InputWithValidator field={fields.email} placeholder="Eg. example@email.com"/>
+                    <InputWithValidator field={fields.birthdate} type="date"/>
                     
                     <div>
-                        <select name={props.fields.gender.name} defaultValue="null">
+                        <select name={fields.gender.name} defaultValue="null">
                             <option disabled value={"null"}>gender</option>
                             <option value="male">male</option>
                             <option value="female">female</option>
                         </select>
                         <ul>
-                            {props.fields.gender.errors.map(error => <li>{error}</li>)}
+                            {fields.gender.errors.map(error => <li>{error}</li>)}
                         </ul>
                     </div>
 
-                    <InputWithValidator field={props.fields.image} type="file"/>
-                    <InputWithValidator field={props.fields.password} type="password"/>
-                    <InputWithValidator field={props.fields.passwordConfirm} type="password"/>
+                    <InputWithValidator field={fields.image} type="file"/>
+                    <InputWithValidator field={fields.password} type="password"/>
+                    <InputWithValidator field={fields.passwordConfirm} type="password"/>
 
-                    <input type="submit" value="Submit"/>
+                    <input type="submit" value="Submit" disabled={isSubmitting}/>
                     <input type="reset" value="Reset"/>
                 </>
             )}
         </GenericForm>
-
-        {/* <formBuilder.inputs.firstname placeholder="First name"/>
-        <formBuilder.inputs.lastname placeholder="Last name"/>
-        <formBuilder.inputs.email placeholder="Eg. example@example.com" type="email"/>
-        <formBuilder.inputs.birthdate type="date"/>
-
-        <formBuilder.inputs.gender>
-            <option value="male">male</option>
-            <option value="female">female</option>
-    </formBuilder.inputs.gender> */}
     </>
 )
 

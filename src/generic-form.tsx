@@ -27,6 +27,7 @@ export interface IGenericFormProps<T> extends React.FormHTMLAttributes<HTMLFormE
 export interface IGenericFormChildProps<T> {
     fieldOptions: FieldOptions<T>;
     fields: Fields<T>;
+    isSubmitting: boolean;
 }
 
 export interface IGenericFormResult<T> {
@@ -77,7 +78,13 @@ const validate = (fieldOptions: FieldOptions<any>, data: FormData) => {
     }, { }) as Fields<any>;
 };
 
-const submit = (fieldOptions: FieldOptions<any>, updateFields: React.Dispatch<React.SetStateAction<{}>>, callback?: (formResult: IGenericFormResult<any>) => any) => (event: React.FormEvent<HTMLFormElement>) => {
+const submit = (
+    fieldOptions: FieldOptions<any>, 
+    updateFields: React.Dispatch<React.SetStateAction<{}>>, 
+    setIsSubmitting: React.Dispatch<React.SetStateAction<{}>>, 
+    callback?: (formResult: IGenericFormResult<any>) => any
+) => async (event: React.FormEvent<HTMLFormElement>) => {
+    
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
@@ -86,11 +93,15 @@ const submit = (fieldOptions: FieldOptions<any>, updateFields: React.Dispatch<Re
     updateFields(fields);
     
     if(callback) {
-        callback({
+        setIsSubmitting(true);
+
+        await callback({
             fields,
             formData,
             isValid: Object.values(fields).every(field => !field.errors.length),
         });
+
+        setIsSubmitting(false);
     }
 };
 
@@ -100,10 +111,15 @@ const submit = (fieldOptions: FieldOptions<any>, updateFields: React.Dispatch<Re
 
 export const GenericForm = <T extends any>({ children, fieldOptions, onFormSubmit, ...formProps }: IGenericFormProps<T>) => {
     const [result, updateResult] = React.useState<Fields<T>>(createEmptyResult(fieldOptions));
+    const [isSubmitting, setSubmitting] = React.useState(false);
 
     return (
-        <form {...formProps} onSubmit={submit(fieldOptions, updateResult, onFormSubmit)}>
-            {children({ fieldOptions, fields: result })}
+        <form {...formProps} onSubmit={submit(fieldOptions, updateResult, setSubmitting, onFormSubmit)}>
+            {children({ 
+                fieldOptions, 
+                isSubmitting,
+                fields: result, 
+            })}
         </form>
     );
 };
