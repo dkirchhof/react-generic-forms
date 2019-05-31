@@ -61,8 +61,8 @@ const App = () => {
                     margin-bottom: 1em;
                 }
             `}}/>
-
-            {showForm && (
+{showForm}
+            {true && (
                 <GenericForm fieldOptions={fieldOptions} onFormSubmit={submit(setShowForm)}>
                     {({ fields, isSubmitting }) => (
                         <>
