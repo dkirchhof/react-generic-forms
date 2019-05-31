@@ -1,10 +1,10 @@
 module.exports = {
     mode: "development",    
-    entry: "./src/index.tsx",
+    entry: "./src/example/index.tsx",
     
     output: {
         filename: "[name].js",
-        path: __dirname + "/dist/",
+        path: __dirname + "/dist/example/",
     },
 
     devtool: "source-map",

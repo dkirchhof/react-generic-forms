@@ -1,27 +1,23 @@
 {
   "name": "react-generic-forms",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/lib/index.js",
   "license": "MIT",
   "scripts": {
-    "build": "webpack",
-    "build-watch": "webpack -w",
-    "serve": "http-server",
-    "lint": "tslint 'src/**/*.{ts,tsx}'",
-    "lint-fix": "tslint --fix 'src/**/*.{ts,tsx}'"
+    "build-lib": "tsc",
+    "build-example": "wp"
   },
   "devDependencies": {
     "@types/react": "^16.4.16",
-    "@types/react-datepicker": "^2.3.0",
     "@types/react-dom": "^16.0.9",
+    "react": "^16.6.3",
+    "react-dom": "^16.6.3",
     "ts-loader": "^5.2.1",
     "typescript": "^3.1.3",
     "webpack": "^4.20.2",
-    "webpack-command": "^0.4.1"
+    "webpack-nano": "^0.6.2"
   },
-  "dependencies": {
-    "react": "^16.6.3",
-    "react-datepicker": "^2.5.0",
-    "react-dom": "^16.6.3"
+  "peerDependencies": {
+    "react": "^16.6.3"
   }
 }

@@ -5,6 +5,11 @@
         "target": "esnext",
         "importHelpers": true,
         "emitDecoratorMetadata": true,
-        "experimentalDecorators": true
-    }
+        "experimentalDecorators": true,
+        "declaration": true,
+        "outDir": "dist/lib/"
+    },
+    "files": [
+        "src/lib/index.ts"
+    ]
 }

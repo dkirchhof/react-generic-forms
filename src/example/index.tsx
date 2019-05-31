@@ -1,9 +1,9 @@
 import * as React from "react";
 import { render } from "react-dom";
 
-import { GenericForm, FieldOptions, IGenericFormResult } from "./generic-form";
+import { GenericForm, FieldOptions, IGenericFormResult } from "../generic-form";
 import { InputWithValidator } from "./input";
-import { minLength, maxLength, simpleMail, isBefore, maxFileSize, isSame } from "./validators";
+import { minLength, maxLength, simpleMail, isBefore, maxFileSize, isSame } from "../validators";
 
 interface IPerson {
     firstname: string;
