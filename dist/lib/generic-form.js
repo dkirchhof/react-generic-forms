@@ -58,10 +58,6 @@ exports.GenericForm = ({ children, fieldOptions, onFormSubmit, ...formProps }) =
     const isMounted = useIsMounted_1.useIsMounted();
     const [result, updateResult] = React.useState(createEmptyResult(fieldOptions));
     const [isSubmitting, setSubmitting] = React.useState(false);
-    React.useEffect(() => {
-        isMounted.current = true;
-        return () => isMounted.current = false;
-    }, []);
     return (React.createElement("form", Object.assign({}, formProps, { onSubmit: submit(fieldOptions, updateResult, setSubmitting, isMounted, onFormSubmit) }), children({
         fieldOptions,
         isSubmitting,

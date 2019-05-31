@@ -124,12 +124,6 @@ export const GenericForm = <T extends any>({ children, fieldOptions, onFormSubmi
     const [result, updateResult] = React.useState<Fields<T>>(createEmptyResult(fieldOptions));
     const [isSubmitting, setSubmitting] = React.useState(false);
 
-    React.useEffect(() => {
-        isMounted.current = true;
-
-        return () => isMounted.current = false;
-    }, []);
-
     return (
         <form {...formProps} onSubmit={submit(fieldOptions, updateResult, setSubmitting, isMounted, onFormSubmit)}>
             {children({ 
