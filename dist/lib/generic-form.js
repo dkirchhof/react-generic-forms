@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = require("react");
+const useIsMounted_1 = require("./useIsMounted");
 const utils_1 = require("./utils");
 // endregion
 // region helper functions
@@ -33,7 +34,7 @@ const validate = (fieldOptions, data) => {
         };
     }, {});
 };
-const submit = (fieldOptions, updateFields, setIsSubmitting, callback) => async (event) => {
+const submit = (fieldOptions, updateFields, setIsSubmitting, isMounted, callback) => async (event) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const fields = validate(fieldOptions, formData);
@@ -46,15 +47,22 @@ const submit = (fieldOptions, updateFields, setIsSubmitting, callback) => async 
             isValid: Object.values(fields).every(field => !field.errors.length),
             json: () => utils_1.formDataToJson(formData),
         });
-        setIsSubmitting(false);
+        if (isMounted.current) {
+            setIsSubmitting(false);
+        }
     }
 };
 // endregion
 // region component
 exports.GenericForm = ({ children, fieldOptions, onFormSubmit, ...formProps }) => {
+    const isMounted = useIsMounted_1.useIsMounted();
     const [result, updateResult] = React.useState(createEmptyResult(fieldOptions));
     const [isSubmitting, setSubmitting] = React.useState(false);
-    return (React.createElement("form", Object.assign({}, formProps, { onSubmit: submit(fieldOptions, updateResult, setSubmitting, onFormSubmit) }), children({
+    React.useEffect(() => {
+        isMounted.current = true;
+        return () => isMounted.current = false;
+    }, []);
+    return (React.createElement("form", Object.assign({}, formProps, { onSubmit: submit(fieldOptions, updateResult, setSubmitting, isMounted, onFormSubmit) }), children({
         fieldOptions,
         isSubmitting,
         fields: result,
