@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 // export type ValidationFunctionWithParams = (...params: any[]) => ValidationFunction;
 // global
-exports.required = () => (formData, key) => formData.get(key) !== null ? null : `value shouldn't be null`;
+exports.required = () => (formData, key) => formData.get(key).toString().length ? null : `required`;
 exports.isSame = (otherKey) => (formData, key) => formData.get(key) === formData.get(otherKey.toString()) ? null : `the value should be the same as the value of ${otherKey}`;
 // string
 exports.minLength = (minLength) => (formData, key) => formData.get(key).length >= minLength ? null : `value should be greater than or equal to ${minLength} characters.`;

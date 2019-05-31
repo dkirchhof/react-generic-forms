@@ -1,5 +1,6 @@
 import * as React from "react";
 
+import { formDataToJson } from "./utils";
 import { ValidationFunction } from "./validators";
 
 // region types and interfaces
@@ -34,6 +35,8 @@ export interface IGenericFormResult<T> {
     fields: Fields<T>;
     formData: FormData;
     isValid: boolean;
+
+    json: () => T;
 }
 
 // endregion
@@ -99,6 +102,8 @@ const submit = (
             fields,
             formData,
             isValid: Object.values(fields).every(field => !field.errors.length),
+            
+            json: () => formDataToJson(formData),
         });
 
         setIsSubmitting(false);

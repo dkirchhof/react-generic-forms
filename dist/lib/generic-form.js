@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = require("react");
+const utils_1 = require("./utils");
 // endregion
 // region helper functions
 const createEmptyResult = (fieldOptions) => {
@@ -43,6 +44,7 @@ const submit = (fieldOptions, updateFields, setIsSubmitting, callback) => async 
             fields,
             formData,
             isValid: Object.values(fields).every(field => !field.errors.length),
+            json: () => utils_1.formDataToJson(formData),
         });
         setIsSubmitting(false);
     }

@@ -28,5 +28,6 @@ export interface IGenericFormResult<T> {
     fields: Fields<T>;
     formData: FormData;
     isValid: boolean;
+    json: () => T;
 }
 export declare const GenericForm: <T extends any>({ children, fieldOptions, onFormSubmit, ...formProps }: IGenericFormProps<T>) => JSX.Element;
