@@ -1,0 +1,12 @@
+export declare type ValidationFunction = (formData: FormData, key: string) => string | null;
+export declare const required: () => ValidationFunction;
+export declare const isSame: <T>(otherKey: keyof T) => ValidationFunction;
+export declare const minLength: (minLength: number) => ValidationFunction;
+export declare const maxLength: (maxLength: number) => ValidationFunction;
+export declare const simpleMail: () => ValidationFunction;
+export declare const minValue: (minValue: number) => ValidationFunction;
+export declare const maxValue: (maxValue: number) => ValidationFunction;
+export declare const isEven: () => ValidationFunction;
+export declare const isOdd: () => ValidationFunction;
+export declare const isBefore: (date: Date) => ValidationFunction;
+export declare const maxFileSize: (maxSize: number) => ValidationFunction;
