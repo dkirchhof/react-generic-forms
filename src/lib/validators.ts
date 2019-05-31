@@ -4,7 +4,7 @@ export type ValidationFunction = (formData: FormData, key: string) => string | n
 // global
 export const required = (): ValidationFunction => 
     (formData: FormData, key: string) =>
-        formData.get(key).toString().length ? null : `required`;
+        formData.get(key) && formData.get(key).toString().length ? null : `required`;
 
 export const isSame = <T>(otherKey: keyof T): ValidationFunction => 
     (formData: FormData, key: string) => 
