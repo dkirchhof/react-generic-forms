@@ -16,11 +16,10 @@ export interface IField<T> {
 }
 export interface IGenericFormProps<T> extends React.FormHTMLAttributes<HTMLFormElement> {
     fieldOptions: FieldOptions<T>;
-    children: (props: IGenericFormChildProps<T>) => React.ReactElement;
-    onFormSubmit?: (result: IGenericFormResult<T>) => any;
+    children: (props: IGenericFormChildProps<T>) => React.ReactElement | React.ReactElement[];
+    onSubmit?: (event: React.FormEvent<HTMLFormElement>) => (result: IGenericFormResult<T>, actions: IGenericFormActions) => any;
 }
 export interface IGenericFormChildProps<T> {
-    fieldOptions: FieldOptions<T>;
     fields: Fields<T>;
     isSubmitting: boolean;
 }
@@ -30,4 +29,7 @@ export interface IGenericFormResult<T> {
     isValid: boolean;
     json: () => T;
 }
-export declare const GenericForm: <T extends any>({ children, fieldOptions, onFormSubmit, ...formProps }: IGenericFormProps<T>) => JSX.Element;
+export interface IGenericFormActions {
+    setSubmitting: React.Dispatch<React.SetStateAction<{}>>;
+}
+export declare const GenericForm: <T extends any>(props: IGenericFormProps<T>) => JSX.Element;

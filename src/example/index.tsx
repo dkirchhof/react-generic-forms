@@ -1,7 +1,7 @@
 import * as React from "react";
 import { render } from "react-dom";
 
-import { GenericForm, FieldOptions, IGenericFormResult } from "../lib/generic-form";
+import { GenericForm, FieldOptions, IGenericFormResult, IGenericFormActions } from "../lib/generic-form";
 import { InputWithValidator } from "./input";
 import { minLength, maxLength, simpleMail, isBefore, maxFileSize, isSame } from "../lib/validators";
 
@@ -27,26 +27,28 @@ const fieldOptions: FieldOptions<IPerson> = {
     passwordConfirm: { validators: [isSame<IPerson>("password")] },
 };
 
-const submit = (setShowForm: React.Dispatch<React.SetStateAction<boolean>>) => (result: IGenericFormResult<IPerson>) => {
-    console.log(result);
-
+const submit = () => (result: IGenericFormResult<IPerson>, actions: IGenericFormActions) => {
     if(!result.isValid) {
-        setShowForm(false);
-        return Promise.resolve();
+        console.log("invalid");
+        return;
     }
     
     return new Promise(res => {
+        console.log("valid");
+
+        actions.setSubmitting(true);
+        
         setTimeout(() => {
             console.log("submitted");
-            setShowForm(false);
+
+            actions.setSubmitting(false);
+
             res();
         }, 2000);
     });
 };
 
 const App = () => {
-    const [showForm, setShowForm] = React.useState(true);
-
     return (
         <>
             <style dangerouslySetInnerHTML={{__html: `
@@ -61,37 +63,35 @@ const App = () => {
                     margin-bottom: 1em;
                 }
             `}}/>
-{showForm}
-            {true && (
-                <GenericForm fieldOptions={fieldOptions} onFormSubmit={submit(setShowForm)}>
-                    {({ fields, isSubmitting }) => (
-                        <>
-                            <InputWithValidator field={fields.firstname} placeholder="First name"/>
-                            <InputWithValidator field={fields.lastname} placeholder="Last name"/>
-                            <InputWithValidator field={fields.email} placeholder="Eg. example@email.com"/>
-                            <InputWithValidator field={fields.birthdate} type="date"/>
-                            
-                            <div>
-                                <select name={fields.gender.name} defaultValue="null">
-                                    <option disabled value={"null"}>gender</option>
-                                    <option value="male">male</option>
-                                    <option value="female">female</option>
-                                </select>
-                                <ul>
-                                    {fields.gender.errors.map(error => <li>{error}</li>)}
-                                </ul>
-                            </div>
 
-                            <InputWithValidator field={fields.image} type="file"/>
-                            <InputWithValidator field={fields.password} type="password"/>
-                            <InputWithValidator field={fields.passwordConfirm} type="password"/>
+            <GenericForm fieldOptions={fieldOptions} onSubmit={submit}>
+                {({ fields, isSubmitting }) => (
+                    <>
+                        <InputWithValidator field={fields.firstname} placeholder="First name"/>
+                        <InputWithValidator field={fields.lastname} placeholder="Last name"/>
+                        <InputWithValidator field={fields.email} placeholder="Eg. example@email.com"/>
+                        <InputWithValidator field={fields.birthdate} type="date"/>
+                        
+                        <div>
+                            <select name={fields.gender.name} defaultValue="null">
+                                <option disabled value={"null"}>gender</option>
+                                <option value="male">male</option>
+                                <option value="female">female</option>
+                            </select>
+                            <ul>
+                                {fields.gender.errors.map(error => <li>{error}</li>)}
+                            </ul>
+                        </div>
 
-                            <input type="submit" value="Submit" disabled={isSubmitting}/>
-                            <input type="reset" value="Reset"/>
-                        </>
-                    )}
-                </GenericForm>
-            )}
+                        <InputWithValidator field={fields.image} type="file"/>
+                        <InputWithValidator field={fields.password} type="password"/>
+                        <InputWithValidator field={fields.passwordConfirm} type="password"/>
+
+                        <input type="submit" value="Submit" disabled={isSubmitting}/>
+                        <input type="reset" value="Reset"/>
+                    </>
+                )}
+            </GenericForm>
         </>
     );
 };

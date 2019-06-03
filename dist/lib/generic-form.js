@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = require("react");
-const useIsMounted_1 = require("./useIsMounted");
 const utils_1 = require("./utils");
 // endregion
 // region helper functions
@@ -34,34 +33,33 @@ const validate = (fieldOptions, data) => {
         };
     }, {});
 };
-const submit = (fieldOptions, updateFields, setIsSubmitting, isMounted, callback) => async (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const fields = validate(fieldOptions, formData);
-    updateFields(fields);
-    if (callback) {
-        setIsSubmitting(true);
-        await callback({
-            fields,
-            formData,
-            isValid: Object.values(fields).every(field => !field.errors.length),
-            json: () => utils_1.formDataToJson(formData),
-        });
-        if (isMounted.current) {
-            setIsSubmitting(false);
-        }
-    }
-};
 // endregion
 // region component
-exports.GenericForm = ({ children, fieldOptions, onFormSubmit, ...formProps }) => {
-    const isMounted = useIsMounted_1.useIsMounted();
-    const [result, updateResult] = React.useState(createEmptyResult(fieldOptions));
+exports.GenericForm = (props) => {
+    const [fields, updateFields] = React.useState(createEmptyResult(props.fieldOptions));
     const [isSubmitting, setSubmitting] = React.useState(false);
-    return (React.createElement("form", Object.assign({}, formProps, { onSubmit: submit(fieldOptions, updateResult, setSubmitting, isMounted, onFormSubmit) }), children({
-        fieldOptions,
-        isSubmitting,
-        fields: result,
-    })));
+    const onSubmit = (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        const fields = validate(props.fieldOptions, formData);
+        updateFields(fields);
+        if (props.onSubmit) {
+            const result = {
+                fields,
+                formData,
+                isValid: Object.values(fields).every(field => !field.errors.length),
+                json: () => utils_1.formDataToJson(formData),
+            };
+            const actions = {
+                setSubmitting,
+            };
+            props.onSubmit(event)(result, actions);
+        }
+    };
+    const childProps = {
+        fields,
+        isSubmitting
+    };
+    return (React.createElement("form", { onSubmit: onSubmit }, props.children(childProps)));
 };
 // endregion

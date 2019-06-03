@@ -1,6 +1,5 @@
 import * as React from "react";
 
-import { useIsMounted } from "./useIsMounted";
 import { formDataToJson } from "./utils";
 import { ValidationFunction } from "./validators";
 
@@ -19,15 +18,13 @@ export interface IField<T> {
     value: T; 
 }
 
-export interface IGenericFormProps<T> extends React.FormHTMLAttributes<HTMLFormElement> {
+export interface IGenericFormProps<T> extends React.FormHTMLAttributes<HTMLFormElement> {  
     fieldOptions: FieldOptions<T>;
-    children: (props: IGenericFormChildProps<T>) => React.ReactElement;
-    
-    onFormSubmit?: (result: IGenericFormResult<T>) => any;
+    children: (props: IGenericFormChildProps<T>) => React.ReactElement | React.ReactElement[];
+    onSubmit?: (event: React.FormEvent<HTMLFormElement>) => (result: IGenericFormResult<T>, actions: IGenericFormActions) => any;
 }
 
 export interface IGenericFormChildProps<T> {
-    fieldOptions: FieldOptions<T>;
     fields: Fields<T>;
     isSubmitting: boolean;
 }
@@ -38,6 +35,10 @@ export interface IGenericFormResult<T> {
     isValid: boolean;
 
     json: () => T;
+}
+
+export interface IGenericFormActions {
+    setSubmitting: React.Dispatch<React.SetStateAction<{}>>;
 }
 
 // endregion
@@ -82,55 +83,47 @@ const validate = (fieldOptions: FieldOptions<any>, data: FormData) => {
     }, { }) as Fields<any>;
 };
 
-const submit = (
-    fieldOptions: FieldOptions<any>, 
-    updateFields: React.Dispatch<React.SetStateAction<{}>>, 
-    setIsSubmitting: React.Dispatch<React.SetStateAction<{}>>, 
-    isMounted: React.MutableRefObject<boolean>,
-    callback?: (formResult: IGenericFormResult<any>) => any,
-) => async (event: React.FormEvent<HTMLFormElement>) => {
-    
-    event.preventDefault();
-
-    const formData = new FormData(event.currentTarget);
-    const fields = validate(fieldOptions, formData);
-
-    updateFields(fields);
-
-    if(callback) {
-        setIsSubmitting(true); 
-
-        await callback({
-            fields,
-            formData,
-            isValid: Object.values(fields).every(field => !field.errors.length),
-            
-            json: () => formDataToJson(formData),
-        });
-        
-        if(isMounted.current) {
-            setIsSubmitting(false);
-        }
-    }
-};
-
 // endregion
 
 // region component
 
-export const GenericForm = <T extends any>({ children, fieldOptions, onFormSubmit, ...formProps }: IGenericFormProps<T>) => {
-    const isMounted = useIsMounted();
-
-    const [result, updateResult] = React.useState<Fields<T>>(createEmptyResult(fieldOptions));
+export const GenericForm = <T extends any>(props: IGenericFormProps<T>) => {
+    const [fields, updateFields] = React.useState<Fields<T>>(createEmptyResult(props.fieldOptions));
     const [isSubmitting, setSubmitting] = React.useState(false);
 
+    const onSubmit = (event: React.FormEvent<HTMLFormElement>) => { 
+        event.preventDefault();
+    
+        const formData = new FormData(event.currentTarget);
+        const fields = validate(props.fieldOptions, formData);
+
+        updateFields(fields);
+    
+        if(props.onSubmit) {
+            const result: IGenericFormResult<T> = {
+                fields,
+                formData,
+                isValid: Object.values(fields).every(field => !field.errors.length),
+                
+                json: () => formDataToJson(formData),
+            };
+            
+            const actions: IGenericFormActions = {
+                setSubmitting,
+            };
+
+            props.onSubmit(event)(result, actions);
+        }
+    };
+
+    const childProps: IGenericFormChildProps<T> = {
+        fields,
+        isSubmitting
+    };
+
     return (
-        <form {...formProps} onSubmit={submit(fieldOptions, updateResult, setSubmitting, isMounted, onFormSubmit)}>
-            {children({ 
-                fieldOptions, 
-                isSubmitting,
-                fields: result, 
-            })}
+        <form onSubmit={onSubmit}>
+            {props.children(childProps)}
         </form>
     );
 };
