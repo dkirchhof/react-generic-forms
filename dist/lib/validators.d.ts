@@ -10,3 +10,6 @@ export declare const isEven: () => ValidationFunction;
 export declare const isOdd: () => ValidationFunction;
 export declare const isBefore: (date: Date) => ValidationFunction;
 export declare const maxFileSize: (maxSize: number) => ValidationFunction;
+export declare const minFileSize: (minSize: number) => ValidationFunction;
+export declare const fileExtension: (extension: string) => ValidationFunction;
+export declare const fileExtensions: (extensions: string[]) => ValidationFunction;

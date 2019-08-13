@@ -3,8 +3,23 @@ export type ValidationFunction = (formData: FormData, key: string) => string | n
 
 // global
 export const required = (): ValidationFunction => 
-    (formData: FormData, key: string) =>
-        formData.get(key) && formData.get(key).toString().length ? null : `required`;
+    (formData: FormData, key: string) => {
+        const value = formData.get(key);
+        
+        if(value instanceof File) {
+            if(value.size === 0) {
+                return "required";
+            }
+        }
+
+        if(typeof value === "string") {
+            if(value.length === 0) {
+                return "required";
+            }
+        }
+
+        return null;
+    };
 
 export const isSame = <T>(otherKey: keyof T): ValidationFunction => 
     (formData: FormData, key: string) => 
@@ -48,5 +63,19 @@ export const isBefore = (date: Date): ValidationFunction =>
 // file
 export const maxFileSize = (maxSize: number): ValidationFunction => 
     (formData: FormData, key: string) =>
-        (formData.get(key) as File).size <= maxSize ? null : `the file size exceeded the maximum size of ${maxSize} bytes`;
+        (formData.get(key) as File).size <= maxSize ? null : `the file size exceededs the maximum size of ${maxSize} bytes`;
     
+export const minFileSize = (minSize: number): ValidationFunction =>
+    (formData: FormData, key: string) =>
+        (formData.get(key) as File).size >= minSize ? null : `the file size deceeds the minimum size of ${minSize} bytes`;
+
+export const fileExtension = (extension: string): ValidationFunction =>
+    (formData: FormData, key: string) => 
+        (formData.get(key) as File).name.endsWith(extension) ? null : `the file should end with ${extension}`;
+
+export const fileExtensions = (extensions: string[]): ValidationFunction =>
+    (formData: FormData, key: string) => {
+        const fileName = (formData.get(key) as File).name;
+
+        return extensions.some(extension => fileName.endsWith(extension)) ? null : `the file should end with one of the following extension ${extensions}`;
+    };
