@@ -1,81 +1,71 @@
-export type ValidationFunction = (formData: FormData, key: string) => string | null
+import { Fields } from "./generic-form";
+
+export type ValidationFunction<T, F> = (value: F | null | undefined, fields: Fields<T>) => string | null
 // export type ValidationFunctionWithParams = (...params: any[]) => ValidationFunction;
 
-// global
-export const required = (): ValidationFunction => 
-    (formData: FormData, key: string) => {
-        const value = formData.get(key);
-        
-        if(value instanceof File) {
-            if(value.size === 0) {
-                return "required";
-            }
-        }
+// region global
+export const required = (): ValidationFunction<any, any> => 
+    value => value && value.toString().length ? null : `required`;
 
-        if(typeof value === "string") {
-            if(value.length === 0) {
-                return "required";
-            }
-        }
+export const isSameAs = <T>(otherKey: keyof T): ValidationFunction<T, any> => 
+    (value, fields) => value === fields[otherKey].value ? null : `the value should be the same as the value of ${otherKey}`;
 
-        return null;
-    };
+export const hasExactValue = <F>(otherValue: F): ValidationFunction<any, F> =>
+    value => value === otherValue ? null : `the value should be ${otherValue}`;
 
-export const isSame = <T>(otherKey: keyof T): ValidationFunction => 
-    (formData: FormData, key: string) => 
-        formData.get(key) === formData.get(otherKey.toString()) ? null : `the value should be the same as the value of ${otherKey}`;
+// endregion
 
-// string
-export const minLength = (minLength: number): ValidationFunction => 
-    (formData: FormData, key: string) =>
-        (formData.get(key) as string).length >= minLength ? null : `value should be greater than or equal to ${minLength} characters.`; 
-    
-export const maxLength = (maxLength: number): ValidationFunction => 
-    (formData: FormData, key: string) =>
-        (formData.get(key) as string).length <= maxLength ? null : `value should be less than or equal to ${maxLength} characters.`; 
-    
-export const simpleMail = (): ValidationFunction => 
-    (formData: FormData, key: string) =>
-        (formData.get(key) as string).match(/\S+@\S+\.\S+/) ? null : `please enter a valid email address`;
-    
-// number
-export const minValue = (minValue: number): ValidationFunction => 
-    (formData: FormData, key: string) =>
-        Number(formData.get(key)) >= minValue ? null : `value should be greater than or equal to ${minValue}.`; 
-    
-export const maxValue = (maxValue: number): ValidationFunction => 
-    (formData: FormData, key: string) =>
-        Number(formData.get(key)) <= maxValue ? null : `value should be less than or equal to ${maxValue}.`; 
-    
-export const isEven = (): ValidationFunction => 
-    (formData: FormData, key: string) =>
-        Number(formData.get(key)) % 2 === 0 ? null : `value should be even.`;
-    
-export const isOdd = (): ValidationFunction => 
-    (formData: FormData, key: string) =>
-        Number(formData.get(key)) % 2 !== 0 ? null : `value should be odd.`;
-    
-// date
-export const isBefore = (date: Date): ValidationFunction => 
-    (formData: FormData, key: string) =>
-        new Date(formData.get(key) as string) < date ? null : `the date should be before ${date.toString()}`;
-    
-// file
-export const maxFileSize = (maxSize: number): ValidationFunction => 
-    (formData: FormData, key: string) =>
-        (formData.get(key) as File).size <= maxSize ? null : `the file size exceededs the maximum size of ${maxSize} bytes`;
-    
-export const minFileSize = (minSize: number): ValidationFunction =>
-    (formData: FormData, key: string) =>
-        (formData.get(key) as File).size >= minSize ? null : `the file size deceeds the minimum size of ${minSize} bytes`;
+// region string
 
-export const fileExtension = (extension: string): ValidationFunction =>
-    (formData: FormData, key: string) => 
-        (formData.get(key) as File).name.endsWith(extension) ? null : `the file should end with ${extension}`;
+export const minLength = (minLength: number): ValidationFunction<any, string> => 
+    value => value && value.length >= minLength ? null : `value should be greater than or equal to ${minLength} characters.`; 
+    
+export const maxLength = (maxLength: number): ValidationFunction<any, string> => 
+    value => value && value.length <= maxLength ? null : `value should be less than or equal to ${maxLength} characters.`; 
+    
+export const simpleMail = (): ValidationFunction<any, string> => 
+    value => value && value.match(/\S+@\S+\.\S+/) ? null : `value should be a valid email address`;
 
-export const fileExtensions = (extensions: string[]): ValidationFunction =>
-    (formData: FormData, key: string) => {
-        const fileName = (formData.get(key) as File).name;
+// endregion
 
-        return extensions.some(extension => fileName.endsWith(extension)) ? null : `the file should end with one of the following extension ${extensions}`;
-    };
+// region number
+
+export const minValue = (minValue: number): ValidationFunction<any, number> => 
+    value => value && value >= minValue ? null : `value should be greater than or equal to ${minValue}.`; 
+    
+export const maxValue = (maxValue: number): ValidationFunction<any, number> => 
+    value => value && value <= maxValue ? null : `value should be less than or equal to ${maxValue}.`; 
+    
+export const isEven = (): ValidationFunction<any, number> => 
+    value => value && value % 2 === 0 ? null : `value should be even.`;
+    
+export const isOdd = (): ValidationFunction<any, number> => 
+    value => value && value % 2 !== 0 ? null : `value should be odd.`;
+    
+// endregion
+
+// region date
+
+export const isAfter = (date: Date): ValidationFunction<any, Date> => 
+    value => value && value > date ? null : `the date should be after ${date.toString()}`;
+
+export const isBefore = (date: Date): ValidationFunction<any, Date> => 
+    value => value && value < date ? null : `the date should be before ${date.toString()}`;
+
+// endregion
+
+// region file
+
+export const maxFileSize = (maxSize: number): ValidationFunction<any, File> => 
+    value => value ? value.size <= maxSize ? null : `the file size exceededs the maximum size of ${maxSize} bytes` : "required";
+    
+export const minFileSize = (minSize: number): ValidationFunction<any, File> =>
+    value => value ? value.size >= minSize ? null : `the file size deceeds the minimum size of ${minSize} bytes` : "required";
+
+export const fileExtension = (extension: string): ValidationFunction<any, File> =>
+    value => value && value.name.endsWith(extension) ? null : `the file should end with ${extension}`;
+
+export const fileExtensions = (extensions: string[]): ValidationFunction<any, File> =>
+    value => value && extensions.some(extension => value.name.endsWith(extension)) ? null : `the file should end with one of the following extension ${extensions}`;
+
+// endregion

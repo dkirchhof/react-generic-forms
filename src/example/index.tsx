@@ -3,7 +3,7 @@ import { render } from "react-dom";
 
 import { GenericForm, FieldOptions, IGenericFormResult, IGenericFormActions } from "../lib/generic-form";
 import { InputWithValidator } from "./input";
-import { minLength, maxLength, simpleMail, isBefore, maxFileSize, isSame } from "../lib/validators";
+import { minLength, maxLength, simpleMail, isBefore, maxFileSize, isSameAs } from "../lib/validators";
 
 interface IPerson {
     firstname: string;
@@ -24,8 +24,19 @@ const fieldOptions: FieldOptions<IPerson> = {
     gender: { },
     image: { validators: [maxFileSize(200)] },
     password: { validators: [minLength(6)] },
-    passwordConfirm: { validators: [isSame<IPerson>("password")] },
+    passwordConfirm: { validators: [isSameAs("password")] },
 };
+
+const initialValues: IPerson = {
+    birthdate: new Date(),
+    email: "",
+    firstname: "",
+    gender: "male",
+    image: null as any,
+    lastname: "",
+    password: "",
+    passwordConfirm: "",
+}
 
 const submit = () => (result: IGenericFormResult<IPerson>, actions: IGenericFormActions) => {
     if(!result.isValid) {
@@ -64,7 +75,7 @@ const App = () => {
                 }
             `}}/>
 
-            <GenericForm fieldOptions={fieldOptions} onSubmit={submit}>
+            <GenericForm fieldOptions={fieldOptions} initialValues={initialValues} onSubmit={submit}>
                 {({ fields, isSubmitting }) => (
                     <>
                         <InputWithValidator field={fields.firstname} placeholder="First name"/>
