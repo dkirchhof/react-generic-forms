@@ -30,6 +30,12 @@ const createValidatedFields = (fields, fieldOptions) => {
         };
     }, {});
 };
+const getValues = (fields) => {
+    return Object.values(fields).reduce((values, field) => ({
+        ...values,
+        [field.name]: field.value,
+    }), {});
+};
 // endregion
 // region component
 exports.GenericForm = (props) => {
@@ -42,7 +48,7 @@ exports.GenericForm = (props) => {
         updateFields(validatedFields);
         if (props.onSubmit && isValid) {
             setSubmitting(true);
-            const values = Object.values(validatedFields).map(field => field.value);
+            const values = getValues(validatedFields);
             try {
                 return await props.onSubmit(event, values);
             }
