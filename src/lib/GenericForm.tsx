@@ -68,6 +68,13 @@ const createValidatedFields = <T extends any>(fields: Fields<T>, fieldOptions: F
     }, { }) as Fields<T>;
 };
 
+const getValues = <T extends any>(fields: Fields<T>) => {
+    return Object.values(fields).reduce((values, field) => ({
+        ...values,
+        [field.name]: field.value,
+    }), { }) as T;
+};
+
 // endregion
 
 // region component
@@ -87,7 +94,7 @@ export const GenericForm = <T extends any>(props: IGenericFormProps<T>) => {
         if(props.onSubmit && isValid) {
             setSubmitting(true);
 
-            const values = Object.values(validatedFields).map(field => field.value) as any;
+            const values = getValues(validatedFields);
 
             try { 
                 return await props.onSubmit(event, values);

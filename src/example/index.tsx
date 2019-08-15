@@ -30,7 +30,7 @@ const fieldOptions: FieldOptions<IPerson> = {
 const initialValues: IPerson = {
     // birthdate: new Date(),
     // email: "",
-    firstname: "",
+    firstname: "Daniel",
     // gender: "male",
     // image: null as any,
     // lastname: "",
