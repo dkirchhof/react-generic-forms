@@ -21,22 +21,12 @@ export interface IGenericFormProps<T> extends Omit<React.FormHTMLAttributes<HTML
     fieldOptions: FieldOptions<T>;
     initialValues: T;
     children: (props: IGenericFormChildProps<T>) => React.ReactElement | React.ReactElement[];
-    onSubmit: (event: React.FormEvent<HTMLFormElement>, result: IGenericFormResult<T>, actions: IGenericFormActions) => void;
+    onSubmit: (event: React.FormEvent<HTMLFormElement>, values: T) => Promise<any>;
 }
 
 export interface IGenericFormChildProps<T> {
     fields: Fields<T>;
     isSubmitting: boolean;
-}
-
-export interface IGenericFormResult<T> {
-    fields: Fields<T>;
-    isValid: boolean;
-    values: T;
-}
-
-export interface IGenericFormActions {
-    setSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 // endregion
@@ -86,25 +76,26 @@ export const GenericForm = <T extends any>(props: IGenericFormProps<T>) => {
     const [fields, updateFields] = React.useState<Fields<T>>(createFields(props.fieldOptions, props.initialValues));
     const [isSubmitting, setSubmitting] = React.useState(false);
 
-    const onGenericSubmit = (event: React.FormEvent<HTMLFormElement>) => { 
+    const onGenericSubmit = async (event: React.FormEvent<HTMLFormElement>) => { 
         event.preventDefault();
     
         const validatedFields = createValidatedFields(fields, props.fieldOptions);
-
+        const isValid = Object.values(validatedFields).every(field => !field.errors.length);
+        
         updateFields(validatedFields);
-    
-        if(props.onSubmit) {
-            const result: IGenericFormResult<T> = {
-                fields,
-                isValid: Object.values(fields).every(field => !field.errors.length),
-                values: Object.values(fields).map(field => field.value) as any,
-            };
-            
-            const actions: IGenericFormActions = {
-                setSubmitting,
-            };
 
-            props.onSubmit(event, result, actions);
+        if(props.onSubmit && isValid) {
+            setSubmitting(true);
+
+            const values = Object.values(validatedFields).map(field => field.value) as any;
+
+            try { 
+                return await props.onSubmit(event, values);
+            } catch (error) {
+                throw error;
+            } finally { 
+                setSubmitting(false);
+            }
         }
     };
 

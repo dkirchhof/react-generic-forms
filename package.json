@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "build-lib": "tsc",
-    "build-example": "wp"
+    "build-lib-and-example": "wp"
   },
   "devDependencies": {
     "@types/react": "^16.4.16",

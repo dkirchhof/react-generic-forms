@@ -1,3 +1,2 @@
-export * from "./generic-form";
-// export * from "./utils";
+export * from "./GenericForm";
 export * from "./validators";

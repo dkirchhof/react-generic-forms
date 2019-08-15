@@ -1,4 +1,4 @@
-import { Fields } from "./generic-form";
+import { Fields } from "./GenericForm";
 
 export type ValidationFunction<T, F> = (value: F | null | undefined, fields: Fields<T>) => string | null
 // export type ValidationFunctionWithParams = (...params: any[]) => ValidationFunction;

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { IField } from "../lib/generic-form";
+import { IField } from "../lib/GenericForm";
 interface IInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     field: IField<any>;
 }

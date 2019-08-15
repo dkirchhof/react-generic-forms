@@ -1,4 +1,4 @@
-import { Fields } from "./generic-form";
+import { Fields } from "./GenericForm";
 export declare type ValidationFunction<T, F> = (value: F | null | undefined, fields: Fields<T>) => string | null;
 export declare const required: () => ValidationFunction<any, any>;
 export declare const isSameAs: <T>(otherKey: keyof T) => ValidationFunction<T, any>;
