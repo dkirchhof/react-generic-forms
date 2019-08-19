@@ -7,7 +7,7 @@ export declare type Fields<T> = {
     [k in keyof T]: IField<T[k]>;
 };
 export interface IFieldOption<T, F> {
-    validators?: ValidationFunction<T, F>[];
+    validators?: Array<ValidationFunction<T, F>>;
 }
 export interface IField<T> {
     name: string;

@@ -49,15 +49,8 @@ exports.GenericForm = (props) => {
         if (props.onSubmit && isValid) {
             setSubmitting(true);
             const values = getValues(validatedFields);
-            try {
-                return await props.onSubmit(event, values);
-            }
-            catch (error) {
-                throw error;
-            }
-            finally {
-                setSubmitting(false);
-            }
+            return props.onSubmit(event, values)
+                .finally(() => setSubmitting(false));
         }
     };
     const childProps = {
