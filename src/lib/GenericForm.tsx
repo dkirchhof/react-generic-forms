@@ -8,7 +8,7 @@ export type FieldOptions<T> = { [k in keyof T]: IFieldOption<T, T[k]>; };
 export type Fields<T> = { [k in keyof T]: IField<T[k]>; };
 
 export interface IFieldOption<T, F> { 
-    validators?: ValidationFunction<T, F>[]; 
+    validators?: Array<ValidationFunction<T, F>>; 
 }
 
 export interface IField<T> { 
@@ -96,13 +96,8 @@ export const GenericForm = <T extends any>(props: IGenericFormProps<T>) => {
 
             const values = getValues(validatedFields);
 
-            try { 
-                return await props.onSubmit(event, values);
-            } catch (error) {
-                throw error;
-            } finally { 
-                setSubmitting(false);
-            }
+            return props.onSubmit(event, values)
+                .finally(() => setSubmitting(false));
         }
     };
 
