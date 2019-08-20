@@ -18,10 +18,13 @@ export interface IGenericFormProps<T> extends Omit<React.FormHTMLAttributes<HTML
     fieldOptions: FieldOptions<T>;
     initialValues: T;
     children: (props: IGenericFormChildProps<T>) => React.ReactElement | React.ReactElement[];
-    onSubmit: (event: React.FormEvent<HTMLFormElement>, values: T) => Promise<any>;
+    onSubmit: (event: React.FormEvent<HTMLFormElement>, values: T, actions: IGenericFormActions) => any;
 }
 export interface IGenericFormChildProps<T> {
     fields: Fields<T>;
     isSubmitting: boolean;
+}
+export interface IGenericFormActions {
+    setSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export declare const GenericForm: <T extends any>(props: IGenericFormProps<T>) => JSX.Element;

@@ -21,12 +21,16 @@ export interface IGenericFormProps<T> extends Omit<React.FormHTMLAttributes<HTML
     fieldOptions: FieldOptions<T>;
     initialValues: T;
     children: (props: IGenericFormChildProps<T>) => React.ReactElement | React.ReactElement[];
-    onSubmit: (event: React.FormEvent<HTMLFormElement>, values: T) => Promise<any>;
+    onSubmit: (event: React.FormEvent<HTMLFormElement>, values: T, actions: IGenericFormActions) => any;
 }
 
 export interface IGenericFormChildProps<T> {
     fields: Fields<T>;
     isSubmitting: boolean;
+}
+
+export interface IGenericFormActions {
+    setSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 // endregion
@@ -48,7 +52,7 @@ const createFields = <T extends any>(fieldOptions: FieldOptions<T>, initialValue
         };
 
     }, { }) as Fields<any>;
-}
+};
 
 const createValidatedFields = <T extends any>(fields: Fields<T>, fieldOptions: FieldOptions<T>) => {
     return Object.values(fields).reduce((result, field) => {      
@@ -95,9 +99,9 @@ export const GenericForm = <T extends any>(props: IGenericFormProps<T>) => {
             setSubmitting(true);
 
             const values = getValues(validatedFields);
+            const actions: IGenericFormActions = { setSubmitting };
 
-            return props.onSubmit(event, values)
-                .finally(() => setSubmitting(false));
+            props.onSubmit(event, values, actions);
         }
     };
 
