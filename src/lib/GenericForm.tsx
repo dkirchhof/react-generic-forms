@@ -21,12 +21,18 @@ export interface IGenericFormProps<T> extends Omit<React.FormHTMLAttributes<HTML
     fieldOptions: FieldOptions<T>;
     initialValues: T;
     children: (props: IGenericFormChildProps<T>) => React.ReactElement | React.ReactElement[];
-    onSubmit: (event: React.FormEvent<HTMLFormElement>, values: T, actions: IGenericFormActions) => any;
+    onSubmit: (result: IGenericFormResult<T>) => any;
 }
 
 export interface IGenericFormChildProps<T> {
     fields: Fields<T>;
     isSubmitting: boolean;
+}
+
+export interface IGenericFormResult<T> {
+    actions: IGenericFormActions;
+    event: React.FormEvent<HTMLFormElement>;
+    values: T;
 }
 
 export interface IGenericFormActions {
@@ -98,10 +104,15 @@ export const GenericForm = <T extends any>(props: IGenericFormProps<T>) => {
         if(isValid) {
             setSubmitting(true);
 
-            const values = getValues(validatedFields);
-            const actions: IGenericFormActions = { setSubmitting };
+            const result: IGenericFormResult<T> = {
+                actions: { 
+                    setSubmitting,
+                },
+                event,
+                values: getValues(validatedFields),            
+            };
 
-            props.onSubmit(event, values, actions);
+            props.onSubmit(result);
         }
     };
 
