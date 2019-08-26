@@ -95,7 +95,7 @@ export const GenericForm = <T extends any>(props: IGenericFormProps<T>) => {
         
         updateFields(validatedFields);
 
-        if(props.onSubmit && isValid) {
+        if(isValid) {
             setSubmitting(true);
 
             const values = getValues(validatedFields);
