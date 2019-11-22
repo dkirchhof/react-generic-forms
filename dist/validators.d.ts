@@ -1,0 +1,18 @@
+import { Fields } from "./GenericForm";
+export declare type ValidationFunction<FieldValueType = any, T = any> = (value: FieldValueType | null | undefined, fields: Fields<T>) => string | null;
+export declare const required: () => ValidationFunction<any, any>;
+export declare const isSameAs: <T>(otherKey: keyof T) => ValidationFunction<any, T>;
+export declare const hasExactValue: <F>(otherValue: F) => ValidationFunction<F, any>;
+export declare const minLength: (minLength: number) => ValidationFunction<string, any>;
+export declare const maxLength: (maxLength: number) => ValidationFunction<string, any>;
+export declare const simpleMail: () => ValidationFunction<string, any>;
+export declare const minValue: (minValue: number) => ValidationFunction<number, any>;
+export declare const maxValue: (maxValue: number) => ValidationFunction<number, any>;
+export declare const isEven: () => ValidationFunction<number, any>;
+export declare const isOdd: () => ValidationFunction<number, any>;
+export declare const isAfter: (date: Date) => ValidationFunction<Date, any>;
+export declare const isBefore: (date: Date) => ValidationFunction<Date, any>;
+export declare const maxFileSize: (maxSize: number) => ValidationFunction<File, any>;
+export declare const minFileSize: (minSize: number) => ValidationFunction<File, any>;
+export declare const fileExtension: (extension: string) => ValidationFunction<File, any>;
+export declare const fileExtensions: (extensions: string[]) => ValidationFunction<File, any>;

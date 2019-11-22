@@ -3,14 +3,9 @@
         "module": "commonjs",
         "jsx": "react",
         "target": "esnext",
-        "importHelpers": true,
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
         "declaration": true,
         "strict": true,
-        "outDir": "dist/lib/"
-    },
-    "files": [
-        "src/lib/index.ts"
-    ]
+        "rootDir": "src",
+        "outDir": "dist"
+    }
 }

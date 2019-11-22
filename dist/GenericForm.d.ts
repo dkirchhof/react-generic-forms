@@ -1,18 +1,18 @@
 import * as React from "react";
 import { ValidationFunction } from "./validators";
 export declare type FieldOptions<T> = {
-    [k in keyof T]: IFieldOption<T, T[k]>;
+    [k in keyof T]: IFieldOption<T[k], T>;
 };
 export declare type Fields<T> = {
     [k in keyof T]: IField<T[k]>;
 };
-export interface IFieldOption<T, F> {
-    validators?: Array<ValidationFunction<T, F>>;
+export interface IFieldOption<FieldValueType, T> {
+    validators?: Array<ValidationFunction<FieldValueType, T>>;
 }
-export interface IField<T> {
+export interface IField<FieldValueType> {
     name: string;
     errors: string[];
-    value: T;
+    value: FieldValueType;
 }
 export interface IGenericFormProps<T> extends Omit<React.FormHTMLAttributes<HTMLFormElement>, "onSubmit"> {
     fieldOptions: FieldOptions<T>;
