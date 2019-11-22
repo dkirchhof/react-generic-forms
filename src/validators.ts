@@ -10,7 +10,7 @@ export const required = (): ValidationFunction<any, any> =>
 export const isSameAs = <T>(otherKey: keyof T): ValidationFunction<any, T> => 
     (value, fields) => value === fields[otherKey].value ? null : `the value should be the same as the value of ${otherKey}`;
 
-export const hasExactValue = <F>(otherValue: F): ValidationFunction<F> =>
+export const hasExactValue = <FieldValueType>(otherValue: FieldValueType): ValidationFunction<FieldValueType> =>
     value => value === otherValue ? null : `the value should be ${otherValue}`;
 
 // endregion
